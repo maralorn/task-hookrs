@@ -17,9 +17,13 @@ error_chain!{
         SerializeError {}
         /// Error kind indicating that there was an internal Error in the TaskCache where a Task
         /// was not cache, which was expected to be there. This is a Bug, which should be reported.
-        CacheMissError {}
+        CacheMissError {
+            description("A not cached Task was marked as dirty. This is a BUG! Report to task-hookrs maintainers.")
+        }
         /// Error kind indicating that the user tried to do something with a TaskCache which would
         /// lead to loosing unsaved changes
-        DirtyCacheError {}
+        DirtyCacheError {
+            description("Tried to discard unsaved changes in TaskCache.")
+        }
     }
 }
