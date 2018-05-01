@@ -44,6 +44,11 @@ impl TaskCache {
         }
     }
 
+    /// Gives tasks ignored by this TaskCache
+    pub fn ignore(&self) -> &Vec<TaskStatus> {
+        &self.ignore
+    }
+
     /// Will load all unignored tasks in the cache.
     /// This will throw an error of kind DirtyCacheError, if there are unsaved changes.
     /// Call `reset` first to circumvent this if you need it.
