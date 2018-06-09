@@ -36,9 +36,12 @@ pub fn add_query_to_cmd(query: &str, mut cmd: Command) -> Command {
 
 /// This executes the given Command and trys to convert the Result into a Vec<Task>.
 pub fn run_query_cmd(mut cmd: Command) -> Result<Vec<Task>> {
-    let mut export = cmd.spawn().chain_err(|| EK::TaskCmdError)?;
-    export.wait().chain_err(|| EK::TaskCmdError)?;
-    import(export.stdout.chain_err(|| EK::TaskCmdError)?)
+    import(
+        cmd.output()
+            .chain_err(|| EK::TaskCmdError)?
+            .stdout
+            .as_slice(),
+    )
 }
 
 /// This function runs the given Command, pipes the tasks as JSON to it and returns a handle to the child process.
