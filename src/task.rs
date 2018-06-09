@@ -13,6 +13,7 @@ use serde::{Serialize, Serializer};
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Deserializer};
 use serde::de::{Visitor, Error, MapAccess};
+use serde_json::from_str;
 use uuid::Uuid;
 use chrono::Utc;
 
@@ -692,11 +693,18 @@ impl<'de> Visitor<'de> for TaskDeserializeVisitor {
                 }
                 "depends" => {
                     let raw: String = visitor.next_value()?;
-                    let mut uuids = vec![];
-                    for uuid in raw.split(",") {
-                        uuids.push(Uuid::parse_str(uuid).map_err(V::Error::custom)?);
+                    // For some crazy reason taskwarrior export sometimes an escaped json array
+                    // (which the spec says, will be used in future specifications)
+                    // or a comma separated list of uuids (which is the current specification).
+                    if let Ok(uuids) = from_str(&raw) {
+                        depends = Some(uuids);
+                    } else {
+                        let mut uuids = vec![];
+                        for uuid in raw.split(",") {
+                            uuids.push(Uuid::parse_str(uuid).map_err(V::Error::custom)?);
+                        }
+                        depends = Some(uuids);
                     }
-                    depends = Some(uuids);
                 }
                 "due" => {
                     due = Some(visitor.next_value()?);
