@@ -253,7 +253,7 @@ impl Task {
     }
 
     /// Set depends
-    pub fn set_depends<T, U>(&mut self, new: Option<T>)
+    pub fn set_depends<T>(&mut self, new: Option<T>)
     where
         T: IntoIterator,
         T::Item: Into<Uuid>,
@@ -473,7 +473,7 @@ impl Task {
     }
 
     /// Set tags
-    pub fn set_tags<T, K>(&mut self, new: Option<T>)
+    pub fn set_tags<T>(&mut self, new: Option<T>)
     where
         T: IntoIterator,
         T::Item: Into<Tag>,
