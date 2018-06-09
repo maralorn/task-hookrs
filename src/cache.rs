@@ -93,25 +93,20 @@ impl TaskCache {
     }
 
     /// Gives all tasks matching the given filter.
-    pub fn filter<F>(&self, func: F) -> Vec<&Task>
-    where
-        F: Fn(&Task) -> bool,
-    {
-        self.cache.values().filter(|x| func(*x)).collect()
+    pub fn filter(&self, func: impl Fn(&Task) -> bool) -> impl Iterator<Item = &Task> {
+        self.cache.values().filter(move |x| func(*x))
     }
 
     /// Gives all tasks matching the given filter as mutable references.
-    /// Beware! This will mark all matches as dirty. They will be saved on the next `write()`.
-    pub fn filter_mut<F>(&mut self, func: F) -> Vec<&mut Task>
-    where
-        F: Fn(&Task) -> bool,
-    {
-        let tasks = self.cache
-            .values_mut()
-            .filter(|x| func(*x))
-            .collect::<Vec<_>>();
-        self.dirty.extend(tasks.iter().map(|t| t.uuid().clone()));
-        tasks
+    /// Beware! This will mark all matches as dirty (when you consume them). They will be saved on the next `write()`.
+    pub fn filter_mut(&mut self, func: impl Fn(&Task) -> bool) -> impl Iterator<Item = &mut Task> {
+        let dirty = &mut self.dirty;
+        self.cache.values_mut().filter(move |x| func(*x)).map(
+            move |t| {
+                dirty.insert(t.uuid().clone());
+                t
+            },
+        )
     }
 
     /// Gives the task with the corresponding uuid.
