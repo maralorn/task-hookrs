@@ -530,6 +530,25 @@ impl Task {
     pub fn uda_mut(&mut self) -> &mut UDA {
         &mut self.uda
     }
+
+    /// Starts task as in `task start`
+    pub fn tw_start(&mut self) {
+        self.set_start(Some(Date::from(Utc::now().naive_utc())));
+    }
+    /// Stops task as in `task stop`
+    pub fn tw_stop(&mut self) {
+        self.set_start(None as Option<Date>);
+    }
+    /// Completes task as in `task done`
+    pub fn tw_done(&mut self) {
+        self.set_end(Some(Date::from(Utc::now().naive_utc())));
+        *self.status_mut() = TaskStatus::Completed;
+    }
+    /// Deletes task as in `task delete`
+    pub fn tw_delete(&mut self) {
+        self.set_end(Some(Date::from(Utc::now().naive_utc())));
+        *self.status_mut() = TaskStatus::Deleted;
+    }
 }
 
 impl Serialize for Task {
