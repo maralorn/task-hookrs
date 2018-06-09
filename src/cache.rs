@@ -82,11 +82,13 @@ impl TaskCache {
 
     /// Saves all entries marked as dirty.
     pub fn write(&mut self) -> Result<&mut TaskCache> {
-        save(self.dirty
-            .iter()
-            .map(|uuid| self.cache.get(uuid).chain_err(|| Ek::CacheMissError))
-            .collect::<Result<Vec<_>>>()?)?;
-        self.dirty.clear();
+        if self.dirty.len() > 0 {
+            save(self.dirty
+                .iter()
+                .map(|uuid| self.cache.get(uuid).chain_err(|| Ek::CacheMissError))
+                .collect::<Result<Vec<_>>>()?)?;
+            self.dirty.clear();
+        }
         Ok(self)
     }
 
