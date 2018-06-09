@@ -52,7 +52,7 @@ impl TaskCache {
     /// Will load all unignored tasks in the cache.
     /// This will throw an error of kind DirtyCacheError, if there are unsaved changes.
     /// Call `reset` first to circumvent this if you need it.
-    pub fn load(&mut self) -> Result<&mut TaskCache> {
+    pub fn load(&mut self) -> Result<()> {
         if self.dirty.len() > 0 {
             bail!(Ek::DirtyCacheError);
         } else {
@@ -63,7 +63,7 @@ impl TaskCache {
                 .into_iter()
                 .map(|t| (t.uuid().clone(), t)),
         );
-        Ok(self)
+        Ok(())
     }
 
     /// Clears the cache and throws away unsaved changes.
@@ -75,13 +75,13 @@ impl TaskCache {
     /// Refreshs the cache, by first saving and then reloading.
     /// This is not only necessary to get out of band changes in taskwarrior
     /// but also because changes to one task may have implications to state of another one.
-    pub fn refresh(&mut self) -> Result<&mut TaskCache> {
+    pub fn refresh(&mut self) -> Result<()> {
         self.write()?;
         self.load()
     }
 
     /// Saves all entries marked as dirty.
-    pub fn write(&mut self) -> Result<&mut TaskCache> {
+    pub fn write(&mut self) -> Result<()> {
         if self.dirty.len() > 0 {
             save(self.dirty
                 .iter()
@@ -89,7 +89,7 @@ impl TaskCache {
                 .collect::<Result<Vec<_>>>()?)?;
             self.dirty.clear();
         }
-        Ok(self)
+        Ok(())
     }
 
     /// Gives all tasks matching the given filter.
@@ -125,10 +125,9 @@ impl TaskCache {
     }
 
     /// Sets a new task into the cache. It will be marked as dirty and saved on the next `write()`.
-    pub fn set(&mut self, task: Task) -> &mut TaskCache {
+    pub fn set(&mut self, task: Task) {
         self.dirty.insert(task.uuid().clone());
         self.cache.insert(task.uuid().clone(), task);
-        self
     }
 }
 
