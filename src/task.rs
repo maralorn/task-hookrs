@@ -108,6 +108,9 @@ pub struct Task {
     /// This hides the task until the wait date
     #[builder(default)]
     wait: Option<Date>,
+    /// Urgency this value is only calculated by taskwarrior, you can't set it
+    #[builder(setter(skip))]
+    urgency: Option<f32>,
 
     /// A map of user defined attributes
     #[builder(default)]
@@ -144,6 +147,7 @@ impl Task {
         tags: Option<Vec<Tag>>,
         until: Option<Date>,
         wait: Option<Date>,
+        urgency: Option<f32>,
         uda: UDA,
     ) -> Task {
         Task {
@@ -169,6 +173,7 @@ impl Task {
             tags: tags,
             until: until,
             wait: wait,
+            urgency: urgency,
             uda: uda,
         }
     }
@@ -512,6 +517,11 @@ impl Task {
         self.wait = new.map(Into::into);
     }
 
+    /// Get urgency
+    pub fn urgency(&self) -> Option<&f32> {
+        self.urgency.as_ref()
+    }
+
     /// Get the BTreeMap that contains the UDA
     pub fn uda(&self) -> &UDA {
         &self.uda
@@ -661,6 +671,7 @@ impl<'de> Visitor<'de> for TaskDeserializeVisitor {
         let mut tags = None;
         let mut until = None;
         let mut wait = None;
+        let mut urgency = None;
         let mut uda = UDA::default();
 
         loop {
@@ -748,6 +759,9 @@ impl<'de> Visitor<'de> for TaskDeserializeVisitor {
                 "wait" => {
                     wait = Some(visitor.next_value()?);
                 }
+                "urgency" => {
+                    urgency = Some(visitor.next_value()?);
+                }
 
                 field => {
                     debug!("Inserting '{}' as UDA", field);
@@ -800,6 +814,7 @@ impl<'de> Visitor<'de> for TaskDeserializeVisitor {
             tags,
             until,
             wait,
+            urgency,
             uda,
         );
 
