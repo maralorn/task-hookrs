@@ -92,9 +92,9 @@ impl TaskCache {
         Ok(())
     }
 
-    /// Gives all tasks matching the given filter.
-    pub fn filter(&self, func: impl Fn(&Task) -> bool) -> impl Iterator<Item = &Task> {
-        self.cache.values().filter(move |x| func(*x))
+    /// Gives an Iterator over all tasks in the cache
+    pub fn iter(&self) -> impl Iterator<Item = &Task> {
+        self.cache.values()
     }
 
     /// Gives all tasks matching the given filter as mutable references.
