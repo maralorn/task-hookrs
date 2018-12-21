@@ -7,7 +7,7 @@
 //! Module containing TaskPriority types and trait impls
 
 /// Enum for the priorities taskwarrior supports.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskPriority {
     /// Low prio for a Task
     #[serde(rename = "L")]
