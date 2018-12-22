@@ -39,24 +39,32 @@ pub struct TaskCache {
 
 /// A TaskCell contains a pointer to a Task in the cache. Which can be borrow immutable or mutable.MutationState
 /// The calls will return None if a conflicting Borrow is active.
-pub struct TaskCell<'a>(&'a RefCell<(Task, MutationState)>);
+pub struct TaskCell<'a> {
+    cell: &'a RefCell<(Task, MutationState)>,
+    cache: &'a TaskCache,
+}
 
 impl<'a> TaskCell<'a> {
     /// Trys to borrow the Task immutable.
     pub fn borrow(&self) -> Option<Ref<Task>> {
-        self.0
+        self.cell
             .try_borrow()
             .ok()
             .map(|x| Ref::map(x, |(task, _)| task))
     }
     /// Trys to borrow the Task mutable.
     pub fn borrow_mut(&self) -> Option<RefMut<Task>> {
-        self.0.try_borrow_mut().ok().map(|x| {
+        self.cell.try_borrow_mut().ok().map(|x| {
             RefMut::map(x, |(task, state)| {
                 *state = MutationState::Dirty;
                 task
             })
         })
+    }
+
+    /// Gives a reference to the TaskCache this TaskCell belongs to.
+    pub fn cache(&self) -> &'a TaskCache {
+        self.cache
     }
 }
 
@@ -99,12 +107,9 @@ impl TaskCache {
         } else {
             self.cache.clear();
         }
-        self.cache.extend(
-            query(&generate_query(&self.ignore))?
-                .into_iter()
-                .map(task_to_entry),
-        );
-        Ok(())
+        query(&generate_query(&self.ignore))
+            .map(|x| x.into_iter().map(task_to_entry))
+            .map(|x| self.cache.extend(x))
     }
 
     /// Clears the cache and throws away unsaved changes.
@@ -116,8 +121,7 @@ impl TaskCache {
     /// This is not only necessary to get out of band changes in taskwarrior
     /// but also because changes to one task may have implications to state of another one.
     pub fn refresh(&mut self) -> Result<()> {
-        self.write()?;
-        self.load()
+        self.write().and_then(|_| self.load())
     }
 
     /// Saves all entries marked as dirty.
@@ -137,12 +141,12 @@ impl TaskCache {
 
     /// Gives an Iterator over all tasks in the cache
     pub fn iter(&self) -> impl Iterator<Item = TaskCell> {
-        self.cache.values().map(|x| TaskCell { 0: &x })
+        self.cache.values().map(move |x| TaskCell { cell: &x, cache: self })
     }
 
     /// Gives the task with the corresponding uuid.
     pub fn get_ptr(&self, uuid: &Uuid) -> Option<TaskCell> {
-        self.cache.get(uuid).map(|x| TaskCell { 0: &x })
+        self.cache.get(uuid).map(|x| TaskCell { cell: &x, cache: self })
     }
 
     /// Sets a new task into the cache. It will be marked as dirty and saved on the next `write()`.
