@@ -24,6 +24,10 @@ pub enum ErrorKind {
 
     /// Error kind indicating that a conversion to JSON failed
     #[fail(display = "A Task could not be converted to JSON")]
-    SerializeError
+    SerializeError,
+
+    /// Error kind indicating that a conversion to JSON failed
+    #[fail(display = "Tried to reload a dirty cache without saving")]
+    DirtyCacheError
 }
 

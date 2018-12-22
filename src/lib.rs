@@ -71,3 +71,4 @@ pub mod tag;
 pub mod task;
 pub mod uda;
 pub mod tw;
+pub mod cache;
