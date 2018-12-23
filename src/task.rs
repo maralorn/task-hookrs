@@ -123,6 +123,7 @@ pub struct Task {
  */
 impl Task {
     /// Create a new Task instance
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         id: Option<u64>,
 
@@ -898,6 +899,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::cyclomatic_complexity)]
     fn test_deser_more() {
         mklogger();
         let s = r#"{

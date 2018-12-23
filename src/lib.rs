@@ -26,6 +26,7 @@
 //!   }
 //! ```
 //!
+#![warn(clippy::all)]
 #![deny(missing_docs)]
 #![doc(html_root_url = "https://matthiasbeyer.github.io/task-hookrs/")]
 #![deny(
