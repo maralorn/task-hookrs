@@ -41,7 +41,7 @@
     unused_must_use,
     unused_mut,
     unused_qualifications,
-    while_true,
+    while_true
 )]
 
 extern crate chrono;
@@ -61,6 +61,7 @@ extern crate env_logger;
 extern crate log;
 
 pub mod annotation;
+pub mod cache;
 pub mod date;
 pub mod error;
 pub mod import;
@@ -69,6 +70,5 @@ pub mod project;
 pub mod status;
 pub mod tag;
 pub mod task;
-pub mod uda;
 pub mod tw;
-pub mod cache;
+pub mod uda;

@@ -6,7 +6,7 @@
 
 //! Module containing `TaskStatus` type and trait impls
 
-use std::fmt::{Display, Formatter, Error as FmtError};
+use std::fmt::{Display, Error as FmtError, Formatter};
 
 /// Enum for status taskwarrior supports.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Deserialize, Serialize)]

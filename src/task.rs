@@ -6,24 +6,24 @@
 
 //! Module containing `Task` type as well as trait implementations
 
-use std::result::Result as RResult;
 use std::fmt;
+use std::result::Result as RResult;
 
-use serde::{Serialize, Serializer};
+use chrono::Utc;
+use serde::de::{Error, MapAccess, Visitor};
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Deserializer};
-use serde::de::{Visitor, Error, MapAccess};
+use serde::{Serialize, Serializer};
 use serde_json::from_str;
 use uuid::Uuid;
-use chrono::Utc;
 
-use priority::TaskPriority;
-use status::TaskStatus;
-use project::Project;
-use tag::Tag;
-use date::Date;
 use annotation::Annotation;
-use uda::{UDA, UDAName, UDAValue};
+use date::Date;
+use priority::TaskPriority;
+use project::Project;
+use status::TaskStatus;
+use tag::Tag;
+use uda::{UDAName, UDAValue, UDA};
 
 /// Task type
 ///
@@ -562,54 +562,54 @@ impl Serialize for Task {
         state.serialize_entry("entry", &self.entry)?;
         state.serialize_entry("description", &self.description)?;
 
-        self.annotations.as_ref().map(|v| {
-            state.serialize_entry("annotations", v)
-        });
+        self.annotations
+            .as_ref()
+            .map(|v| state.serialize_entry("annotations", v));
         self.tags.as_ref().map(|v| state.serialize_entry("tags", v));
         self.id.as_ref().map(|v| state.serialize_entry("id", v));
-        self.recur.as_ref().map(
-            |ref v| state.serialize_entry("recur", v),
-        );
+        self.recur
+            .as_ref()
+            .map(|ref v| state.serialize_entry("recur", v));
         self.depends.as_ref().map(|ref v| {
             let v: Vec<String> = v.iter().map(Uuid::to_string).collect();
             state.serialize_entry("depends", &v.join(","))
         });
-        self.due.as_ref().map(
-            |ref v| state.serialize_entry("due", v),
-        );
-        self.end.as_ref().map(
-            |ref v| state.serialize_entry("end", v),
-        );
-        self.imask.as_ref().map(
-            |ref v| state.serialize_entry("imask", v),
-        );
-        self.mask.as_ref().map(
-            |ref v| state.serialize_entry("mask", v),
-        );
-        self.modified.as_ref().map(|ref v| {
-            state.serialize_entry("modified", v)
-        });
-        self.parent.as_ref().map(|ref v| {
-            state.serialize_entry("parent", v)
-        });
-        self.priority.as_ref().map(|ref v| {
-            state.serialize_entry("priority", v)
-        });
-        self.project.as_ref().map(|ref v| {
-            state.serialize_entry("project", v)
-        });
-        self.scheduled.as_ref().map(|ref v| {
-            state.serialize_entry("scheduled", v)
-        });
-        self.start.as_ref().map(
-            |ref v| state.serialize_entry("start", v),
-        );
-        self.until.as_ref().map(
-            |ref v| state.serialize_entry("until", v),
-        );
-        self.wait.as_ref().map(
-            |ref v| state.serialize_entry("wait", v),
-        );
+        self.due
+            .as_ref()
+            .map(|ref v| state.serialize_entry("due", v));
+        self.end
+            .as_ref()
+            .map(|ref v| state.serialize_entry("end", v));
+        self.imask
+            .as_ref()
+            .map(|ref v| state.serialize_entry("imask", v));
+        self.mask
+            .as_ref()
+            .map(|ref v| state.serialize_entry("mask", v));
+        self.modified
+            .as_ref()
+            .map(|ref v| state.serialize_entry("modified", v));
+        self.parent
+            .as_ref()
+            .map(|ref v| state.serialize_entry("parent", v));
+        self.priority
+            .as_ref()
+            .map(|ref v| state.serialize_entry("priority", v));
+        self.project
+            .as_ref()
+            .map(|ref v| state.serialize_entry("project", v));
+        self.scheduled
+            .as_ref()
+            .map(|ref v| state.serialize_entry("scheduled", v));
+        self.start
+            .as_ref()
+            .map(|ref v| state.serialize_entry("start", v));
+        self.until
+            .as_ref()
+            .map(|ref v| state.serialize_entry("until", v));
+        self.wait
+            .as_ref()
+            .map(|ref v| state.serialize_entry("wait", v));
 
         for (key, value) in self.uda().iter() {
             state.serialize_entry(key, value)?;
@@ -630,7 +630,6 @@ impl<'de> Deserialize<'de> for Task {
             "uuid",
             "entry",
             "description",
-
             "annotations",
             "depends",
             "due",
@@ -816,7 +815,6 @@ impl<'de> Visitor<'de> for TaskDeserializeVisitor {
             uuid,
             entry,
             description,
-
             annotations,
             depends,
             due,
@@ -843,16 +841,16 @@ impl<'de> Visitor<'de> for TaskDeserializeVisitor {
 
 #[cfg(test)]
 mod test {
+    use annotation::Annotation;
     use date::Date;
     use date::TASKWARRIOR_DATETIME_TEMPLATE;
     use status::TaskStatus;
     use task::Task;
-    use annotation::Annotation;
     use uda::UDAValue;
 
-    use uuid::Uuid;
     use chrono::NaiveDateTime;
     use serde_json;
+    use uuid::Uuid;
 
     fn mklogger() {
         use env_logger;
@@ -933,9 +931,9 @@ mod test {
 
         if let Some(tags) = task.tags() {
             for tag in tags {
-                let any_tag = ["some", "tags", "are", "here"].into_iter().any(
-                    |t| tag == *t,
-                );
+                let any_tag = ["some", "tags", "are", "here"]
+                    .into_iter()
+                    .any(|t| tag == *t);
                 assert!(any_tag, "Tag {} missing", tag);
             }
         } else {
@@ -961,9 +959,11 @@ mod test {
         assert!(back.contains("here"));
         assert!(back.contains("uuid"));
         assert!(back.contains("8ca953d5-18b4-4eb9-bd56-18f2e5b752f0"));
-        assert!(back.contains(
-            "8ca953d5-18b4-4eb9-bd56-18f2e5b752f0,5a04bb1e-3f4b-49fb-b9ba-44407ca223b5",
-        ));
+        assert!(
+            back.contains(
+                "8ca953d5-18b4-4eb9-bd56-18f2e5b752f0,5a04bb1e-3f4b-49fb-b9ba-44407ca223b5",
+            )
+        );
     }
 
     #[test]
@@ -991,15 +991,14 @@ mod test {
         assert!(task.is_ok());
         let task: Task = task.unwrap();
 
-        let all_annotations =
-            vec![
-                Annotation::new(mkdate("20160423T125911Z"), String::from("An Annotation")),
-                Annotation::new(
-                    mkdate("20160423T125926Z"),
-                    String::from("Another Annotation")
-                ),
-                Annotation::new(mkdate("20160422T125942Z"), String::from("A Third Anno")),
-            ];
+        let all_annotations = vec![
+            Annotation::new(mkdate("20160423T125911Z"), String::from("An Annotation")),
+            Annotation::new(
+                mkdate("20160423T125926Z"),
+                String::from("Another Annotation"),
+            ),
+            Annotation::new(mkdate("20160422T125942Z"), String::from("A Third Anno")),
+        ];
 
         if let Some(annotations) = task.annotations() {
             for annotation in annotations {
@@ -1091,7 +1090,7 @@ mod test {
     #[test]
     fn test_builder_extensive() {
         use task::TaskBuilder;
-        use uda::{UDA, UDAValue};
+        use uda::{UDAValue, UDA};
         let mut uda = UDA::new();
         uda.insert(
             "test_str_uda".into(),
@@ -1130,12 +1129,10 @@ mod test {
     #[test]
     fn test_builder_defaults() {
         use task::TaskBuilder;
-        assert!(
-            TaskBuilder::default()
-                .description("Nice Task")
-                .build()
-                .is_ok()
-        );
+        assert!(TaskBuilder::default()
+            .description("Nice Task")
+            .build()
+            .is_ok());
     }
 
     #[test]

@@ -144,12 +144,18 @@ impl TaskCache {
 
     /// Gives an Iterator over all tasks in the cache
     pub fn iter(&self) -> impl Iterator<Item = TaskCell> {
-        self.cache.values().map(move |x| TaskCell { cell: &x, cache: self })
+        self.cache.values().map(move |x| TaskCell {
+            cell: &x,
+            cache: self,
+        })
     }
 
     /// Gives the task with the corresponding uuid.
     pub fn get_ptr(&self, uuid: &Uuid) -> Option<TaskCell> {
-        self.cache.get(uuid).map(|x| TaskCell { cell: &x, cache: self })
+        self.cache.get(uuid).map(|x| TaskCell {
+            cell: &x,
+            cache: self,
+        })
     }
 
     /// Sets a new task into the cache. It will be marked as dirty and saved on the next `write()`.
