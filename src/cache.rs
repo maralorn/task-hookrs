@@ -125,17 +125,20 @@ impl TaskCache {
     }
 
     /// Saves all entries marked as dirty.
-    pub fn write(&mut self) -> Result<()> {
+    pub fn write(&self) -> Result<()> {
         let updates = self
             .cache
             .values()
-            .map(RefCell::borrow)
-            .filter(|x| (*x).1 == MutationState::Dirty)
+            .filter(|x| x.borrow().1 == MutationState::Dirty)
+            .map(|x| {
+                x.borrow_mut().1 = MutationState::Clean;
+                x.borrow()
+            })
             .collect::<Vec<_>>();
-        if updates.is_empty() {
-            Ok(())
+        if !updates.is_empty() {
+            save(updates.iter().map(|x| &x.0))
         } else {
-            save(updates.iter().map(|x| &(*x).0))
+            Ok(())
         }
     }
 
