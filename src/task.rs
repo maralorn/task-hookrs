@@ -730,7 +730,7 @@ impl<'de> Visitor<'de> for TaskDeserializeVisitor {
                         depends = Some(uuids);
                     } else {
                         let mut uuids = vec![];
-                        for uuid in raw.split(",") {
+                        for uuid in raw.split(',') {
                             uuids.push(Uuid::parse_str(uuid).map_err(V::Error::custom)?);
                         }
                         depends = Some(uuids);
@@ -856,7 +856,7 @@ mod test {
 
     fn mklogger() {
         use env_logger;
-        let _ = env_logger::init();
+        env_logger::init();
         debug!("Env-logger enabled");
     }
 
@@ -882,12 +882,10 @@ mod test {
         assert!(task.is_ok());
         let task: Task = task.unwrap();
 
-        assert!(task.status().clone() == TaskStatus::Waiting);
+        assert!(*task.status() == TaskStatus::Waiting);
         assert!(task.description() == "test");
-        assert!(task.entry().clone() == mkdate("20150619T165438Z"));
-        assert!(
-            task.uuid().clone() == Uuid::parse_str("8ca953d5-18b4-4eb9-bd56-18f2e5b752f0").unwrap()
-        );
+        assert!(*task.entry() == mkdate("20150619T165438Z"));
+        assert!(*task.uuid() == Uuid::parse_str("8ca953d5-18b4-4eb9-bd56-18f2e5b752f0").unwrap());
 
         let back = serde_json::to_string(&task).unwrap();
 
@@ -925,12 +923,10 @@ mod test {
         assert!(task.is_ok());
         let task: Task = task.unwrap();
 
-        assert!(task.status().clone() == TaskStatus::Waiting);
+        assert!(*task.status() == TaskStatus::Waiting);
         assert!(task.description() == "some description");
         assert!(task.entry().clone() == mkdate("20150619T165438Z"));
-        assert!(
-            task.uuid().clone() == Uuid::parse_str("8ca953d5-18b4-4eb9-bd56-18f2e5b752f0").unwrap()
-        );
+        assert!(*task.uuid() == Uuid::parse_str("8ca953d5-18b4-4eb9-bd56-18f2e5b752f0").unwrap());
 
         assert!(task.modified() == Some(&mkdate("20160327T164007Z")));
         assert!(task.project() == Some(&String::from("someproject")));

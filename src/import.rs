@@ -37,7 +37,7 @@ pub fn import_tasks<BR: BufRead>(r: BR) -> Vec<Result<Task>> {
             continue;
         }
         // Unwrap is safe because of continue above
-        if line.as_ref().unwrap().len() <= 0 {
+        if line.as_ref().unwrap().is_empty() {
             // Empty strings are not usable, and shall be silently ignored
             continue;
         }
@@ -158,9 +158,7 @@ fn test_one_single() {
     assert!(task.status() == &TaskStatus::Waiting);
     assert!(task.description() == "some description");
     assert!(task.entry().clone() == mkdate("20150619T165438Z"));
-    assert!(
-        task.uuid().clone() == Uuid::parse_str("8ca953d5-18b4-4eb9-bd56-18f2e5b752f0").unwrap()
-    );
+    assert!(*task.uuid() == Uuid::parse_str("8ca953d5-18b4-4eb9-bd56-18f2e5b752f0").unwrap());
     assert!(task.modified() == Some(&mkdate("20160327T164007Z")));
     assert!(task.project() == Some(&String::from("someproject")));
     if let Some(tags) = task.tags() {

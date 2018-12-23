@@ -68,7 +68,7 @@ impl<'a> TaskCell<'a> {
     }
 }
 
-fn generate_query(ignore: &Vec<TaskStatus>) -> String {
+fn generate_query(ignore: &[TaskStatus]) -> String {
     ignore
         .iter()
         .map(|x| format!("-{}", x).to_uppercase())
